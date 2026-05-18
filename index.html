@@ -193,7 +193,7 @@ footer{border-top:0.5px solid var(--border);padding:3rem}
       </div>
       <div id="gist-test-result" style="margin-top:0.4rem;font-size:0.63rem;min-height:1em"></div>
       <div style="margin-top:0.6rem;font-size:0.62rem;color:var(--muted);line-height:1.75;background:#f9f9f9;padding:0.6rem;border:0.5px solid var(--border)">
-        ① gist.github.com → 새 Gist 생성 (파일명: <code style="background:#eee;padding:0 2px">doodle_data.json</code>, 내용: <code style="background:#eee;padding:0 2px">{}</code>)<br>
+        ① gist.github.com → 새 Gist 생성 (파일명: <code style="background:#eee;padding:0 2px">data.json</code>, 내용: <code style="background:#eee;padding:0 2px">{}</code>)<br>
         ② GitHub Settings → Developer settings → Tokens → gist 권한 토큰 발급<br>
         ③ 위에 입력 후 저장 → 관리자 변경사항이 모든 방문자에게 실시간 반영됩니다
       </div>
@@ -439,7 +439,8 @@ var DEFAULT_TEXTS={
 var issues=[], subscribers=[], texts=Object.assign({},DEFAULT_TEXTS);
 var isAdmin=false, currentSlide=0;
 var _notePdfBlob=null, _notePdfFileName='note.pdf';
-var _gistId='', _gistToken='';
+var _gistId = '354969f4035565b5b1c40f8c556652d1';
+var _gistToken = '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';
 var _editingId=null;   // currently open inline edit row
 
 /* ===================================================
@@ -1097,10 +1098,14 @@ document.getElementById('note-pdf-name').textContent=
   document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 });
 
-// Pull from Gist on page load (read-only, no token needed for public gist)
+// 페이지 로드 시 Gist에서 데이터를 무조건 가져옴
 if(_gistId){
   gistPull(function(ok){
-    if(ok){applyTexts();renderSlider();}
+    if(ok){
+      applyTexts();
+      renderSlider();
+      console.log("최신 데이터를 성공적으로 불러왔습니다.");
+    }
   });
 }
 
