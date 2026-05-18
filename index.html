@@ -417,7 +417,7 @@ footer{border-top:0.5px solid var(--border);padding:3rem}
 =================================================== */
 var ADMIN_ID='seulkiwoo', ADMIN_PW='doodle2614';
 var DEFAULT_PDF='note.pdf';
-var GIST_FILE='doodle_data.json';
+var GIST_FILE='data.json';
 
 var DEFAULT_TEXTS={
   introLines:'\uC6B0\uB9AC\uB294 \uC74C\uC545\uC744 \uAC10\uC0C1\uD569\uB2C8\uB2E4\n\uC6B0\uB9AC\uB294 \uC74C\uC545\uC744 \uAE30\uB85D\uD569\uB2C8\uB2E4\n\uC6B0\uB9AC\uB294 \uC74C\uC545\uC744 \uB099\uC11C\uD569\uB2C8\uB2E4',
@@ -587,10 +587,12 @@ function loadLocal(){
    SAVE & PUSH helper
 =================================================== */
 function saveAndPush(){
-  persistLocal();
-  if(_gistId&&_gistToken){
-    setSyncStatus('\uC800\uC7A5 \uC911\u2026','');
-    gistPush(null);
+  persistLocal(); // 로컬 브라우저에 먼저 저장
+  if(_gistId && _gistToken){
+    console.log("Gist 전송을 시작합니다..."); // 디버깅용
+    forcePushGist(); // 실제 Gist 전송 함수 호출
+  } else {
+    showToast('로컬에 저장되었습니다 (Gist 미연동)');
   }
 }
 
