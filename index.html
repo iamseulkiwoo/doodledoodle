@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>두드리기 — doodle doodle</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--text:#1a1a1a;--muted:#999;
+  --accent:#8bb5c4;--accent-light:#c8dde5;
+  --accent-lighter:#ddedf3;--accent-pale:#eef5f8;
+  --border:#e0e0e0;
+  --card-a:#c8dde5;--card-b:#b0cdd8;--card-c:#98bcca;
+  --ok:#27ae60;--err:#c0392b;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;line-height:1.7;overflow-x:hidden}
+#intro{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:999;transition:opacity 0.8s ease}
+#intro.fade-out{opacity:0;pointer-events:none}
+#intro-title{font-family:'Noto Serif KR',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:300;letter-spacing:0.2em;cursor:pointer;user-select:none;transition:opacity 0.2s}
+#intro-title:hover{opacity:0.6}
+.doodle-pop{position:fixed;font-family:'IM Fell English',serif;font-style:italic;font-size:clamp(0.75rem,1.5vw,1rem);color:#444;opacity:0;transform:scale(0.4) rotate(-8deg);transition:opacity 0.35s ease,transform 0.45s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;z-index:1000;white-space:nowrap}
+.doodle-pop.show{opacity:1;transform:scale(1) rotate(0deg)}
+#main{opacity:0;transition:opacity 0.8s ease 0.2s;min-height:100vh}
+#main.visible{opacity:1}
+header{padding:1.5rem 3rem;display:flex;align-items:baseline;justify-content:space-between;border-bottom:0.5px solid var(--border)}
+.header-brand{font-family:'IM Fell English',serif;font-style:italic;font-size:0.75rem;color:var(--muted);letter-spacing:0.05em}
+.header-title{font-family:'Noto Serif KR',serif;font-size:1.25rem;font-weight:300;letter-spacing:0.15em}
+nav a{font-size:0.75rem;color:var(--muted);text-decoration:none;margin-left:2rem;letter-spacing:0.05em}
+nav a:hover{color:var(--text)}
+.slider-section{padding:3.5rem 0 2rem;position:relative}
+.slider-wrapper{display:flex;align-items:center;justify-content:center;position:relative;height:320px;overflow:visible}
+.slide-card{position:absolute;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.slide-card img{width:100%;height:100%;object-fit:cover}
+.slide-card .ph{font-size:0.68rem;color:rgba(255,255,255,0.75);letter-spacing:0.12em;font-family:'IM Fell English',serif;font-style:italic}
+.pos-center{width:200px;height:260px;z-index:5;background:var(--card-a)}
+.pos-l1{width:172px;height:228px;z-index:4;background:var(--card-b);transform:translateX(-212px) translateY(12px)}
+.pos-r1{width:172px;height:228px;z-index:4;background:var(--card-b);transform:translateX(212px) translateY(12px)}
+.pos-l2{width:148px;height:198px;z-index:3;background:var(--card-c);transform:translateX(-374px) translateY(22px)}
+.pos-r2{width:148px;height:198px;z-index:3;background:var(--card-c);transform:translateX(374px) translateY(22px)}
+.arr-btn{position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;z-index:10;padding:0.6rem;opacity:0.5;transition:opacity 0.2s;line-height:0}
+.arr-btn:hover{opacity:0.9}
+.arr-left{left:calc(50% - 440px)}
+.arr-right{right:calc(50% - 440px)}
+.slide-info{text-align:center;margin-top:1.8rem;display:flex;align-items:center;justify-content:center;gap:1.5rem}
+.issue-badge{display:inline-block;border:0.5px solid var(--text);border-radius:999px;padding:0.22rem 1.1rem;font-size:0.68rem;letter-spacing:0.1em;font-family:'Noto Sans KR',sans-serif}
+.view-btn{font-size:0.68rem;letter-spacing:0.1em;color:var(--text);border:0.5px solid var(--border);padding:0.22rem 1.3rem;cursor:pointer;background:none;font-family:'IM Fell English',serif;font-style:italic;transition:background 0.2s}
+.view-btn:hover{background:var(--accent-pale)}
+.content-section{text-align:center;padding:4rem 2rem;border-top:0.5px solid var(--border)}
+.intro-lines{font-family:'Noto Serif KR',serif;font-size:clamp(1.05rem,2.5vw,1.55rem);font-weight:300;line-height:2.1}
+.doodle-arrow-note{margin-top:1.4rem;display:inline-block;font-family:'IM Fell English',serif;font-style:italic;font-size:0.85rem;color:var(--muted);position:relative;padding-left:2.8rem}
+.doodle-arrow-note::before{content:'';position:absolute;left:0;top:50%;width:1.8rem;height:1.2rem;border-left:1px solid #bbb;border-bottom:1px solid #bbb;border-radius:0 0 0 6px;transform:translateY(-55%)}
+.mission-text{margin-top:3rem;font-size:clamp(0.9rem,2vw,1.15rem);line-height:2.1}
+.mission-text em{font-style:normal;font-family:'Noto Serif KR',serif}
+.sample-note{margin:3rem auto 0;max-width:340px;background:#faf8f5;border:0.5px solid #e4e0db;padding:1.6rem;text-align:left;font-size:0.74rem;line-height:1.85;color:#555;position:relative}
+.sample-note-label{position:absolute;top:-0.65rem;left:1rem;background:#faf8f5;padding:0 0.4rem;font-size:0.62rem;color:var(--muted);letter-spacing:0.12em}
+.sample-note-title{font-weight:400;color:#333;margin-bottom:0.2rem}
+.sample-note-sub{font-size:0.63rem;color:#aaa;margin-bottom:0.8rem}
+.sample-note-body{color:#777;font-size:0.72rem;line-height:1.9}
+footer{border-top:0.5px solid var(--border);padding:3rem}
+.footer-top{display:flex;flex-direction:column;align-items:center;text-align:center;gap:0.8rem;margin-bottom:2.5rem}
+.dl-btn{background:var(--accent-lighter);border:0.5px solid var(--accent);padding:0.65rem 2.2rem;font-size:0.8rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;letter-spacing:0.05em;cursor:pointer;transition:background 0.2s}
+.dl-btn:hover{background:var(--accent-light)}
+.contrib-mail{font-size:0.74rem;color:var(--muted)}
+.contrib-mail a{color:var(--text);text-decoration:none}
+.contrib-mail a:hover{text-decoration:underline}
+.subscribe-box{background:var(--accent-pale);border:0.5px solid var(--accent-light);padding:2.2rem 3rem;text-align:center;margin:0 -3rem}
+.subscribe-title{font-family:'Noto Serif KR',serif;font-size:1.1rem;font-weight:400;letter-spacing:0.1em;margin-bottom:0.4rem}
+.subscribe-sub{font-size:0.74rem;color:var(--muted);margin-bottom:1.3rem;letter-spacing:0.04em}
+.subscribe-form{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.subscribe-form input{padding:0.5rem 1rem;border:0.5px solid var(--border);font-size:0.78rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;width:240px;background:#fff;outline:none}
+.subscribe-form input:focus{border-color:var(--accent)}
+.subscribe-form button{padding:0.5rem 1.5rem;border:0.5px solid var(--border);background:#fff;font-size:0.78rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;cursor:pointer;transition:background 0.2s}
+.subscribe-form button:hover{background:var(--accent-light)}
+.footer-bottom{margin-top:2.5rem;text-align:center;font-size:0.68rem;color:var(--muted);line-height:1.9;letter-spacing:0.05em}
+/* LOGIN */
+#login-page{display:none;position:fixed;inset:0;background:#fff;z-index:500;align-items:center;justify-content:center}
+#login-page.active{display:flex}
+.login-box{padding:3rem;border:0.5px solid var(--border);width:340px;text-align:center}
+.login-title{font-family:'Noto Serif KR',serif;font-size:1.1rem;font-weight:300;margin-bottom:0.4rem;letter-spacing:0.15em}
+.login-sub{font-size:0.68rem;color:var(--muted);margin-bottom:2rem;line-height:1.6}
+.login-box input{width:100%;margin-bottom:0.8rem;padding:0.5rem 0.75rem;border:0.5px solid var(--border);font-size:0.8rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none}
+.login-box input:focus{border-color:var(--accent)}
+.login-btn{width:100%;padding:0.6rem;background:var(--accent-lighter);border:0.5px solid var(--accent);font-size:0.8rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;cursor:pointer;letter-spacing:0.05em}
+.login-btn:hover{background:var(--accent-light)}
+.login-error{font-size:0.74rem;color:var(--err);margin-top:0.5rem;min-height:1.2em}
+.gist-setup{background:#fafafa;border:0.5px solid var(--border);padding:1.2rem;margin-top:1.5rem;text-align:left}
+.gist-setup-title{font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.8rem;text-transform:uppercase}
+.gist-setup input{width:100%;margin-bottom:0.6rem;padding:0.4rem 0.6rem;border:0.5px solid var(--border);font-size:0.75rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none}
+.gist-setup input:focus{border-color:var(--accent)}
+/* ADMIN */
+#admin-page{display:none;padding:3rem;max-width:1000px;margin:0 auto}
+#admin-page.active{display:block}
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border)}
+.admin-title{font-family:'Noto Serif KR',serif;font-size:1.2rem;font-weight:400}
+.admin-header-right{display:flex;align-items:center;gap:1.5rem}
+.sync-status{font-size:0.68rem;color:var(--muted);letter-spacing:0.04em}
+.sync-status.ok{color:var(--ok)}
+.sync-status.err{color:var(--err)}
+.admin-back{font-size:0.74rem;color:var(--muted);cursor:pointer;text-decoration:none}
+.admin-back:hover{color:var(--text)}
+.admin-tabs{display:flex;border-bottom:0.5px solid var(--border);margin-bottom:2rem}
+.admin-tab{padding:0.6rem 1.5rem;font-size:0.74rem;letter-spacing:0.06em;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-0.5px;font-family:'Noto Sans KR',sans-serif}
+.admin-tab.active{color:var(--text);border-bottom-color:var(--text)}
+.admin-tab:hover{color:var(--text)}
+.admin-panel{display:none}
+.admin-panel.active{display:block}
+.admin-section{margin-bottom:2.5rem}
+.admin-section-title{font-size:0.68rem;letter-spacing:0.14em;color:var(--muted);margin-bottom:1rem;text-transform:uppercase;border-bottom:0.5px solid var(--border);padding-bottom:0.5rem}
+.aform{display:flex;flex-direction:column;gap:0.75rem}
+.aform label{font-size:0.72rem;color:var(--muted);margin-bottom:-0.4rem}
+.aform input,.aform textarea,.aform select{width:100%;padding:0.5rem 0.75rem;border:0.5px solid var(--border);font-size:0.8rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;background:#fff;outline:none}
+.aform input[type=file]{padding:0.35rem 0.5rem}
+.aform input:focus,.aform textarea:focus{border-color:var(--accent)}
+.aform textarea{resize:vertical;min-height:80px}
+.abtn{padding:0.5rem 1.4rem;background:var(--accent-lighter);border:0.5px solid var(--accent);font-size:0.74rem;font-family:'Noto Sans KR',sans-serif;cursor:pointer;letter-spacing:0.04em;transition:background 0.15s}
+.abtn:hover{background:var(--accent-light)}
+.abtn:disabled{opacity:0.4;cursor:not-allowed}
+.abtn-danger{background:#fff3f3;border-color:#e0aaaa;color:var(--err)}
+.abtn-danger:hover{background:#fde8e8}
+.abtn-sm{padding:0.25rem 0.8rem;font-size:0.68rem}
+.atable{width:100%;border-collapse:collapse;font-size:0.74rem}
+.atable th{text-align:left;padding:0.5rem 0.75rem;border-bottom:0.5px solid var(--border);font-weight:400;color:var(--muted);letter-spacing:0.05em;white-space:nowrap}
+.atable td{padding:0.55rem 0.75rem;border-bottom:0.5px solid var(--border);vertical-align:middle}
+.atable tr:hover td{background:var(--accent-pale)}
+/* inline edit row */
+.edit-row td{background:#f8fbfc !important;padding:1rem 0.75rem}
+.edit-row textarea{width:100%;padding:0.4rem 0.6rem;border:0.5px solid var(--accent);font-size:0.78rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;resize:vertical;min-height:60px}
+.edit-row input{padding:0.3rem 0.6rem;border:0.5px solid var(--accent);font-size:0.78rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;width:100%}
+.file-tag{font-size:0.65rem;color:var(--ok);display:inline-flex;align-items:center;gap:3px}
+.file-none{font-size:0.65rem;color:var(--muted)}
+/* text-edit grid */
+.text-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.tcard{background:#fafafa;border:0.5px solid var(--border);padding:1.1rem}
+.tcard label{display:block;font-size:0.65rem;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem;text-transform:uppercase}
+.tcard textarea,.tcard input{width:100%;padding:0.4rem 0.6rem;border:0.5px solid var(--border);font-size:0.78rem;font-family:'Noto Sans KR',sans-serif;font-weight:300;outline:none;resize:vertical;background:#fff}
+.tcard textarea:focus,.tcard input:focus{border-color:var(--accent)}
+/* sync banner */
+.sync-banner{background:var(--accent-pale);border:0.5px solid var(--accent-light);padding:0.8rem 1.2rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.sync-banner p{font-size:0.74rem;color:#555;margin:0}
+.sync-banner a{font-size:0.68rem;color:var(--accent);text-decoration:none}
+.sync-banner a:hover{text-decoration:underline}
+/* modal */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.28);z-index:800;align-items:center;justify-content:center}
+#modal-overlay.active{display:flex}
+.modal-box{background:#fff;padding:2.5rem;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--muted)}
+.modal-issue{font-size:0.68rem;color:var(--muted);letter-spacing:0.1em;margin-bottom:0.5rem}
+.modal-title{font-family:'Noto Serif KR',serif;font-size:1.35rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem}
+.modal-essay{font-size:0.84rem;line-height:1.95;color:#444;white-space:pre-line}
+.modal-dl-btn{display:inline-block;margin-top:1.5rem;padding:0.5rem 1.5rem;background:var(--accent-lighter);border:0.5px solid var(--accent);font-size:0.74rem;cursor:pointer;text-decoration:none;color:var(--text)}
+/* toast */
+#toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:0.6rem 1.5rem;font-size:0.78rem;opacity:0;pointer-events:none;transition:opacity 0.3s;z-index:9999;white-space:nowrap}
+#toast.show{opacity:1}
+@media(max-width:640px){
+  header{padding:1rem 1.5rem;flex-wrap:wrap;gap:0.5rem}
+  nav a{margin-left:1rem}
+  .arr-left{left:0.2rem}.arr-right{right:0.2rem}
+  .pos-l2,.pos-r2{display:none}
+  .pos-l1{transform:translateX(-152px) translateY(12px)}.pos-r1{transform:translateX(152px) translateY(12px)}
+  footer{padding:2rem 1.5rem}
+  .subscribe-box{padding:2rem 1.5rem;margin:0 -1.5rem}
+  .text-grid{grid-template-columns:1fr}
+  #admin-page{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro"><div id="intro-title" onclick="handleKnock()">두드리기</div></div>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-title">관리자 로그인</div>
+    <div class="login-sub">Gist 연동 시 모든 방문자에게 반영됩니다<br><span style="font-size:0.63rem;color:#bbb">Gist 없이도 로컬 저장·관리 가능</span></div>
+    <input type="text" id="login-id" placeholder="아이디" autocomplete="off">
+    <input type="password" id="login-pw" placeholder="비밀번호">
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-error" id="login-error"></div>
+
+    <div class="gist-setup" id="gist-setup-box">
+      <div class="gist-setup-title">&#9881; GitHub Gist 연동 (모든 방문자 공유용, 선택)</div>
+      <input type="text" id="cfg-gist-id" placeholder="Gist ID  (예: a1b2c3d4e5f6...)">
+      <input type="text" id="cfg-token" placeholder="GitHub Token (Settings → Developer → gist 권한)">
+      <div style="display:flex;gap:0.5rem;margin-top:0.3rem;flex-wrap:wrap">
+        <button class="abtn abtn-sm" onclick="saveGistCfg()">저장</button>
+        <button class="abtn abtn-sm" onclick="testGistCfg()" style="background:#f5f5f5;border-color:#ccc">연결 테스트</button>
+        <a href="https://gist.github.com" target="_blank" style="font-size:0.65rem;color:var(--accent);align-self:center;text-decoration:none">Gist 만들기 &#8599;</a>
+      </div>
+      <div id="gist-test-result" style="margin-top:0.4rem;font-size:0.63rem;min-height:1em"></div>
+      <div style="margin-top:0.6rem;font-size:0.62rem;color:var(--muted);line-height:1.75;background:#f9f9f9;padding:0.6rem;border:0.5px solid var(--border)">
+        ① gist.github.com → 새 Gist 생성 (파일명: <code style="background:#eee;padding:0 2px">doodle_data.json</code>, 내용: <code style="background:#eee;padding:0 2px">{}</code>)<br>
+        ② GitHub Settings → Developer settings → Tokens → gist 권한 토큰 발급<br>
+        ③ 위에 입력 후 저장 → 관리자 변경사항이 모든 방문자에게 실시간 반영됩니다
+      </div>
+    </div>
+
+    <div style="margin-top:1.2rem"><a href="#" onclick="showMain();return false" style="font-size:0.7rem;color:var(--muted);text-decoration:none">&#8592; 메인으로</a></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <header>
+    <div>
+      <div class="header-brand">‘doodle doodle’</div>
+      <div class="header-title">두드리기</div>
+    </div>
+    <nav>
+      <a href="#about">소개</a>
+      <a href="#subscribe">구독</a>
+      <a href="#" onclick="showLoginPage();return false">관리자</a>
+    </nav>
+  </header>
+
+  <section class="slider-section" id="about">
+    <div class="slider-wrapper" id="sliderWrapper">
+      <button class="arr-btn arr-left" onclick="prevSlide()" aria-label="이전">
+        <svg width="52" height="36" viewBox="0 0 52 36" fill="none">
+          <path d="M44 10 C36 10 20 22 10 28" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M10 28 L16 26" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M10 28 L13 22" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="arr-btn arr-right" id="arrRight" onclick="nextSlide()" aria-label="다음">
+        <svg width="52" height="36" viewBox="0 0 52 36" fill="none">
+          <path d="M8 10 C16 10 32 22 42 28" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M42 28 L36 26" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M42 28 L39 22" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="slide-info">
+      <span class="issue-badge" id="issueBadge">준비 중</span>
+      <button class="view-btn" onclick="openCurrentModal()">[ view ]</button>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="intro-lines" id="txt-intro-lines"></div>
+    <div style="margin-top:1.4rem">
+      <span class="doodle-arrow-note" id="txt-doodle-note"></span>
+    </div>
+    <div class="mission-text" id="txt-mission"></div>
+    <div class="sample-note" id="sample-note-block">
+      <span class="sample-note-label" id="txt-example-label"></span>
+      <div class="sample-note-title" id="txt-example-title"></div>
+      <div class="sample-note-sub" id="txt-example-sub"></div>
+      <div class="sample-note-body" id="txt-example-body"></div>
+    </div>
+  </section>
+
+  <footer id="subscribe">
+    <div class="footer-top">
+      <button class="dl-btn" onclick="downloadNote()">청음노트 PDF 다운로드</button>
+      <div class="contrib-mail">자유 기고 : <a id="txt-contrib-link" href="#"><span id="txt-contrib-mail"></span></a></div>
+    </div>
+    <div class="subscribe-box">
+      <div class="subscribe-title" id="txt-sub-title"></div>
+      <div class="subscribe-sub" id="txt-sub-sub"></div>
+      <div class="subscribe-form">
+        <input type="email" id="subEmail" placeholder="이메일 주소 입력">
+        <button onclick="doSubscribe()">구독하기</button>
+      </div>
+    </div>
+    <div class="footer-bottom" id="txt-footer-bottom"></div>
+  </footer>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-page">
+  <div class="admin-header">
+    <div class="admin-title">관리자 대시보드 &#8212; 두드리기</div>
+    <div class="admin-header-right">
+      <span class="sync-status" id="syncStatus">&#9679; Gist 미연동</span>
+      <button class="abtn abtn-sm" onclick="forcePushGist()" id="pushBtn" style="display:none">&#8593; Gist에 저장</button>
+      <button class="abtn abtn-sm abtn-danger" onclick="doLogout()" style="padding:0.2rem 0.8rem;font-size:0.68rem">로그아웃</button>
+      <a href="#" class="admin-back" onclick="showMain();return false">&#8592; 메인으로</a>
+    </div>
+  </div>
+
+  <div id="sync-banner" class="sync-banner" style="display:none">
+    <p>&#9888; Gist 미연동 — 지금은 <strong>이 기기에만</strong> 저장됩니다. 모든 방문자에게 반영하려면 아래 GitHub Gist를 연동하세요 (무료).</p>
+    <a href="#" onclick="document.getElementById('login-page').classList.add('active');return false">연동 설정 열기 &#8599;</a>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchTab('tab-issues',this)">발행물 관리</button>
+    <button class="admin-tab" onclick="switchTab('tab-texts',this)">홈 텍스트 편집</button>
+    <button class="admin-tab" onclick="switchTab('tab-pdf',this)">청음노트 PDF</button>
+    <button class="admin-tab" onclick="switchTab('tab-subs',this)">구독자 목록</button>
+  </div>
+
+  <!-- TAB: ISSUES -->
+  <div class="admin-panel active" id="tab-issues">
+    <div class="admin-section">
+      <div class="admin-section-title">새 발행물 추가</div>
+      <div class="aform" id="add-issue-form">
+        <label>호수 <span style="color:var(--err)">*</span></label>
+        <input type="text" id="a-issue" placeholder="2026-07  2호">
+        <label>제목 <span style="color:var(--err)">*</span></label>
+        <input type="text" id="a-title" placeholder="발행물 제목">
+        <label>표지 이미지 (PNG / JPG / WEBP)</label>
+        <input type="file" id="a-img-file" accept="image/png,image/jpeg,image/webp">
+        <label>이 호수 전용 PDF (없으면 청음노트 PDF 탭의 기본 파일 사용)</label>
+        <input type="file" id="a-pdf-file" accept=".pdf">
+        <label>소개글</label>
+        <textarea id="a-essay" placeholder="발행물 소개글을 입력하세요..."></textarea>
+        <div style="display:flex;gap:0.6rem;margin-top:0.3rem">
+          <button class="abtn" onclick="addIssue()" id="addIssueBtn">발행물 추가</button>
+          <span id="addIssueStatus" style="font-size:0.72rem;color:var(--muted);align-self:center"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">발행물 목록 (<span id="issueCount">0</span>건) &nbsp;<span style="font-weight:300;letter-spacing:0">— 행 클릭 또는 [수정] 버튼으로 인라인 편집</span></div>
+      <table class="atable" id="issueTable">
+        <thead>
+          <tr>
+            <th style="width:40px">순서</th>
+            <th style="width:110px">호수</th>
+            <th>제목</th>
+            <th style="width:70px">표지</th>
+            <th style="width:70px">PDF</th>
+            <th style="width:75px">등록일</th>
+            <th style="width:120px"></th>
+          </tr>
+        </thead>
+        <tbody id="issueTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: TEXTS -->
+  <div class="admin-panel" id="tab-texts">
+    <div class="admin-section">
+      <div class="admin-section-title">홈 텍스트 편집</div>
+      <div class="text-grid">
+        <div class="tcard"><label>상단 소개 문구 (줄바꿈 = 엔터)</label><textarea id="edit-intro-lines" rows="3"></textarea></div>
+        <div class="tcard"><label>Doodle 화살표 메모</label><input type="text" id="edit-doodle-note"></div>
+        <div class="tcard"><label>미션 텍스트 (줄바꿈 = 엔터)</label><textarea id="edit-mission" rows="3"></textarea></div>
+        <div class="tcard"><label>Example 레이블</label><input type="text" id="edit-ex-label"></div>
+        <div class="tcard"><label>Example 앨범 제목</label><input type="text" id="edit-ex-title"></div>
+        <div class="tcard"><label>Example 서브 정보</label><input type="text" id="edit-ex-sub"></div>
+        <div class="tcard" style="grid-column:span 2"><label>Example 본문</label><textarea id="edit-ex-body" rows="3"></textarea></div>
+        <div class="tcard"><label>자유 기고 이메일</label><input type="text" id="edit-contrib-mail"></div>
+        <div class="tcard"><label>구독 박스 제목</label><input type="text" id="edit-sub-title"></div>
+        <div class="tcard"><label>구독 박스 부제</label><input type="text" id="edit-sub-sub"></div>
+        <div class="tcard" style="grid-column:span 2"><label>푸터 하단 (ISSN / Copyright 등, 줄바꿈 가능)</label><textarea id="edit-footer-bottom" rows="2"></textarea></div>
+      </div>
+      <div style="margin-top:1.5rem;display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center">
+        <button class="abtn" onclick="saveTexts()">저장 및 홈에 반영</button>
+        <button class="abtn abtn-danger" onclick="resetTexts()">기본값 초기화</button>
+        <span id="textSaveStatus" style="font-size:0.72rem;color:var(--muted)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: PDF -->
+  <div class="admin-panel" id="tab-pdf">
+    <div class="admin-section">
+      <div class="admin-section-title">청음노트 PDF (기본 다운로드 파일)</div>
+      <p style="font-size:0.74rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.7">
+        발행물에 별도 PDF가 없으면 이 파일이 다운로드됩니다.<br>
+        <strong>주의:</strong> PDF는 파일 크기 문제로 브라우저 세션 중에만 유지됩니다 (메모리 보관). 페이지 새로 고침 후에는 다시 업로드 필요합니다.<br>
+        영구 공유를 원하면 PDF를 외부(Google Drive, Dropbox 등)에 올린 뒤 발행물 PDF란에 URL을 입력하세요.
+      </p>
+      <div class="aform" style="max-width:480px">
+        <label>현재 파일: <span id="note-pdf-name" style="color:var(--text);font-style:italic">note.pdf (기본)</span></label>
+        <input type="file" id="note-pdf-file" accept=".pdf">
+        <div style="display:flex;gap:0.6rem;margin-top:0.2rem;align-items:center">
+          <button class="abtn" onclick="uploadNotePdf()">파일 교체</button>
+          <span id="pdfUploadStatus" style="font-size:0.72rem;color:var(--muted)"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SUBSCRIBERS -->
+  <div class="admin-panel" id="tab-subs">
+    <div class="admin-section">
+      <div class="admin-section-title">구독자 목록 (<span id="subCount">0</span>명)</div>
+      <div style="margin-bottom:1rem;display:flex;gap:0.8rem;flex-wrap:wrap">
+        <button class="abtn" onclick="exportSubs()">CSV 내보내기</button>
+        <button class="abtn abtn-danger" onclick="clearAllSubs()">전체 삭제</button>
+      </div>
+      <table class="atable">
+        <thead><tr><th>이메일</th><th style="width:100px">신청일</th><th style="width:60px"></th></tr></thead>
+        <tbody id="subTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">&#10005;</button>
+    <div class="modal-issue" id="modal-issue"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-essay" id="modal-essay"></div>
+    <a class="modal-dl-btn" id="modal-dl" href="#" target="_blank">PDF 다운로드</a>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ===================================================
+   CONSTANTS
+=================================================== */
+var ADMIN_ID='seulkiwoo', ADMIN_PW='doodle2614';
+var DEFAULT_PDF='note.pdf';
+var GIST_FILE='doodle_data.json';
+
+var DEFAULT_TEXTS={
+  introLines:'\uC6B0\uB9AC\uB294 \uC74C\uC545\uC744 \uAC10\uC0C1\uD569\uB2C8\uB2E4\n\uC6B0\uB9AC\uB294 \uC74C\uC545\uC744 \uAE30\uB85D\uD569\uB2C8\uB2E4\n\uC6B0\uB9AC\uB294 \uC74C\uC545\uC744 \uB099\uC11C\uD569\uB2C8\uB2E4',
+  doodleNote:'\u2018Doodle\u2019 \u2192 \u201c\uB450\uB4DC\uB9AC\uAE30\u201d',
+  mission:'\uBE44\uC815\uAE30 \uB3C5\uB9BD \uCD9C\uD310\uBB3C \u300A\uB450\uB4DC\uB9AC\uAE30\u300B\uB294\n\uC74C\uC545\uC744 \uAC10\uC0C1\uD558\uACE0 \uAE30\uB85D\uD558\uBA70\n\uC77C\uC0C1\uACFC \uC5F0\uACB0 \uC9D3\uC2B5\uB2C8\uB2E4',
+  exLabel:'example \u2014 \u97F3\u697D\u9451\u8CDE',
+  exTitle:'\uB864\uB7EC\uCF54\uC2A4\uD130 \u300A\uC77C\uC0C1\uB2E4\uBC18\uC0AC\u300B 2000',
+  exSub:'\uC218\uB85D\uACE1 11\uAC1C / 45:49',
+  exBody:'\uB4E4\uB728\uC788\uB358 \uB3D9\uD654 \uAC19\uC740 \uC5F0\uC608\uC778 \uC560\uAE30, \uD5C8\uC0C1, \uC720\uD589\uC774 \uC544\uB2C8\uB77C \uC815\uB9D0 \uB0B4 \uC560\uAE30\uB97C \uD574\uC900\uB2E4. \uBC84\uC2A4 \uBE48\uC790\uB9AC, \uAC70\uC6B8\uC5D0 \uC720\uB3C5 \uC11C\uC2DD\uD558\uB294 \uC790\uB9AC\uC5D0 \uC0DD\uAE34 \uC790\uB9AC\u2026',
+  contribMail:'doodledoodle@gmail.com',
+  subTitle:'\u300A\uB450\uB4DC\uB9AC\uAE30\u300B \uBB34\uB8CC \uAD6C\uB3C5 \uC2E0\uCCAD',
+  subSub:'\uBE44\uC815\uAE30\uC801\uC73C\uB85C \uBC1C\uD589\uB418\uB294 \uCF58\uD150\uCE20\uB97C \uBC1B\uC544\uBCF4\uC138\uC694',
+  footerBottom:'ISSN 1234-5678\nCopyright \u00A9 2026. All rights reserved.'
+};
+
+/* ===================================================
+   STATE
+=================================================== */
+var issues=[], subscribers=[], texts=Object.assign({},DEFAULT_TEXTS);
+var isAdmin=false, currentSlide=0;
+var _notePdfBlob=null, _notePdfFileName='note.pdf';
+var _gistId='', _gistToken='';
+var _editingId=null;   // currently open inline edit row
+
+/* ===================================================
+   GIST CONFIG (persisted in localStorage — config only, no content)
+=================================================== */
+function loadGistCfg(){
+  _gistId=localStorage.getItem('doodle_gist_id')||'';
+  _gistToken=localStorage.getItem('doodle_gist_token')||'';
+  if(_gistId) document.getElementById('cfg-gist-id').value=_gistId;
+  if(_gistToken) document.getElementById('cfg-token').value='*'.repeat(20);
+}
+function saveGistCfg(){
+  var id=document.getElementById('cfg-gist-id').value.trim();
+  var tok=document.getElementById('cfg-token').value.trim();
+  if(!id){showToast('Gist ID를 입력해주세요');return;}
+  if(tok&&!tok.startsWith('*')){
+    _gistToken=tok;
+    localStorage.setItem('doodle_gist_token',tok);
+    document.getElementById('cfg-token').value='*'.repeat(20);
+  }
+  _gistId=id;
+  localStorage.setItem('doodle_gist_id',id);
+  showToast('Gist 설정이 저장되었습니다 \u2713');
+  updateSyncUI();
+}
+function testGistCfg(){
+  var id=document.getElementById('cfg-gist-id').value.trim()||_gistId;
+  var tok=document.getElementById('cfg-token').value.trim();
+  if(tok.startsWith('*')) tok=_gistToken;
+  var res=document.getElementById('gist-test-result');
+  if(!id){res.textContent='Gist ID를 입력해주세요';res.style.color='var(--err)';return;}
+  res.textContent='연결 확인 중…';res.style.color='var(--muted)';
+  fetch('https://api.github.com/gists/'+id,{headers:tok?{Authorization:'token '+tok}:{}})
+  .then(function(r){
+    if(r.ok){res.textContent='✓ 연결 성공';res.style.color='var(--ok)';}
+    else{res.textContent='✗ 실패 ('+r.status+') — ID 또는 토큰을 확인하세요';res.style.color='var(--err)';}
+  })
+  .catch(function(){res.textContent='✗ 네트워크 오류';res.style.color='var(--err)';});
+}
+function doLogout(){
+  isAdmin=false;
+  showMain();
+  showToast('로그아웃 되었습니다');
+  document.getElementById('login-id').value='';
+  document.getElementById('login-pw').value='';
+}
+function updateSyncUI(){
+  var el=document.getElementById('syncStatus');
+  var pb=document.getElementById('pushBtn');
+  var banner=document.getElementById('sync-banner');
+  if(_gistId&&_gistToken){
+    el.textContent='\u25CF Gist 연동됨'; el.className='sync-status ok';
+    if(pb)pb.style.display='';
+    if(banner)banner.style.display='none';
+  } else {
+    el.textContent='\u25CB Gist 미연동'; el.className='sync-status';
+    if(pb)pb.style.display='none';
+    if(banner)banner.style.display='';
+  }
+}
+
+/* ===================================================
+   GIST SYNC — pull (read) & push (write)
+=================================================== */
+function gistPull(cb){
+  if(!_gistId){if(cb)cb(false);return;}
+  fetch('https://api.github.com/gists/'+_gistId,{
+    headers:_gistToken?{Authorization:'token '+_gistToken}:{}
+  })
+  .then(function(r){return r.json()})
+  .then(function(data){
+    if(!data.files||!data.files[GIST_FILE]){if(cb)cb(false);return;}
+    var raw=JSON.parse(data.files[GIST_FILE].content);
+    if(raw.issues) issues=raw.issues;
+    if(raw.subscribers) subscribers=raw.subscribers;
+    if(raw.texts) texts=Object.assign({},DEFAULT_TEXTS,raw.texts);
+    persistLocal();
+    applyTexts(); renderSlider();
+    if(cb)cb(true);
+  })
+  .catch(function(){if(cb)cb(false)});
+}
+function gistPush(cb){
+  if(!_gistId||!_gistToken){if(cb)cb(false);return;}
+  var payload=JSON.stringify({
+    description:'두드리기 데이터',
+    files:{[GIST_FILE]:{content:JSON.stringify({issues:getSerializableIssues(),subscribers:subscribers,texts:texts})}}
+  });
+  fetch('https://api.github.com/gists/'+_gistId,{
+    method:'PATCH',
+    headers:{Authorization:'token '+_gistToken,'Content-Type':'application/json'},
+    body:payload
+  })
+  .then(function(r){return r.json()})
+  .then(function(){setSyncStatus('저장됨 \u2713','ok');if(cb)cb(true)})
+  .catch(function(){setSyncStatus('저장 실패','err');if(cb)cb(false)});
+}
+function forcePushGist(){
+  setSyncStatus('저장 중\u2026','');
+  gistPush(function(ok){if(!ok)showToast('Gist 저장 실패 — 설정을 확인하세요');});
+}
+function setSyncStatus(msg,cls){
+  var el=document.getElementById('syncStatus');
+  el.textContent=msg; el.className='sync-status'+(cls?' '+cls:'');
+  if(cls==='ok') setTimeout(updateSyncUI,2500);
+}
+
+/* Blob URLs can't be serialized — strip pdf blob, keep only metadata */
+function getSerializableIssues(){
+  return issues.map(function(i){
+    var c=Object.assign({},i);
+    if(c.pdf&&c.pdf.startsWith('blob:')) {c.pdf='';} // can't serialize blobs
+    if(c.img&&c.img.startsWith('data:')) {/* keep base64 images */}
+    return c;
+  });
+}
+
+/* ===================================================
+   LOCAL PERSISTENCE (fallback / cache)
+=================================================== */
+function persistLocal(){
+  try{
+    localStorage.setItem('doodle_issues',JSON.stringify(getSerializableIssues()));
+    localStorage.setItem('doodle_subs',JSON.stringify(subscribers));
+    localStorage.setItem('doodle_texts',JSON.stringify(texts));
+  }catch(e){}
+}
+function loadLocal(){
+  try{
+    var i=localStorage.getItem('doodle_issues');
+    var s=localStorage.getItem('doodle_subs');
+    var t=localStorage.getItem('doodle_texts');
+    if(i) issues=JSON.parse(i);
+    if(s) subscribers=JSON.parse(s);
+    if(t) texts=Object.assign({},DEFAULT_TEXTS,JSON.parse(t));
+  }catch(e){}
+  if(!issues.length) issues=[{
+    id:1,issue:'2026-05  1\ud638',title:'\uB450\uB4DC\uB9AC\uAE30 \uCC3D\uAC04\uD638',img:'',imgName:'',pdf:'',pdfName:'',
+    essay:'\uC74C\uC545\uC744 \uB450\uB4DC\uB9AC\uACE0, \uB099\uC11C\uD558\uACE0, \uAE30\uB85D\uD558\uB294 \uBE44\uC815\uAE30 \uB3C5\uB9BD \uC6F9\uC9C4.\n\n\uCCAB \uBC88\uC9F8 \uD638\uB294 \uB864\uB7EC\uCF54\uC2A4\uD130\uC758 \u300A\uC77C\uC0C1\uB2E4\uBC18\uC0AC\u300B\uC640 \uD568\uAED8 \uC2DC\uC791\uD569\uB2C8\uB2E4.',
+    date:'2026-05-17'
+  }];
+}
+
+/* ===================================================
+   SAVE & PUSH helper
+=================================================== */
+function saveAndPush(){
+  persistLocal();
+  if(_gistId&&_gistToken){
+    setSyncStatus('\uC800\uC7A5 \uC911\u2026','');
+    gistPush(null);
+  }
+}
+
+/* ===================================================
+   APPLY TEXTS → DOM
+=================================================== */
+function applyTexts(){
+  var t=texts;
+  function el(id){return document.getElementById(id);}
+  el('txt-intro-lines').innerHTML=t.introLines.split('\n').join('<br>');
+  el('txt-doodle-note').textContent=t.doodleNote;
+  el('txt-mission').innerHTML=t.mission.split('\n').map(function(l){
+    return l.replace(/\u300a([^\u300b]+)\u300b/g,'<em>\u300a$1\u300b</em>');
+  }).join('<br>');
+  el('txt-example-label').textContent=t.exLabel;
+  el('txt-example-title').textContent=t.exTitle;
+  el('txt-example-sub').textContent=t.exSub;
+  el('txt-example-body').textContent=t.exBody;
+  el('txt-contrib-mail').textContent=t.contribMail;
+  el('txt-contrib-link').href='mailto:'+t.contribMail;
+  el('txt-sub-title').textContent=t.subTitle;
+  el('txt-sub-sub').textContent=t.subSub;
+  el('txt-footer-bottom').innerHTML=t.footerBottom.split('\n').join('<br>');
+}
+
+/* ===================================================
+   INTRO
+=================================================== */
+var _knockDone=false;
+function playKnock(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [0,0.38].forEach(function(t){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=160;o.type='sine';
+      g.gain.setValueAtTime(0,ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(0.45,ctx.currentTime+t+0.012);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.2);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.22);
+    });
+  }catch(e){}
+}
+function spawnDoodle(delay,txt){
+  setTimeout(function(){
+    var el=document.createElement('div');el.className='doodle-pop';el.textContent=txt;
+    var m=110;
+    el.style.left=(m+Math.random()*(window.innerWidth-m*2))+'px';
+    el.style.top=(m+Math.random()*(window.innerHeight-m*2))+'px';
+    document.getElementById('intro').appendChild(el);
+    requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('show')});});
+  },delay);
+}
+function handleKnock(){
+  if(_knockDone)return; _knockDone=true;
+  playKnock();
+  spawnDoodle(80,'\u2018doodle\u2019');
+  spawnDoodle(430,'\u2018doodle\u2019');
+  setTimeout(function(){
+    document.getElementById('intro').classList.add('fade-out');
+    document.getElementById('main').classList.add('visible');
+    setTimeout(function(){document.getElementById('intro').style.display='none';},900);
+  },1300);
+  renderSlider();
+}
+
+/* ===================================================
+   SLIDER
+=================================================== */
+function renderSlider(){
+  var wrapper=document.getElementById('sliderWrapper');
+  wrapper.querySelectorAll('.slide-card').forEach(function(c){c.remove();});
+  var n=issues.length;
+  var pos=['pos-l2','pos-l1','pos-center','pos-r1','pos-r2'];
+  var off=[-2,-1,0,1,2];
+  var anchor=document.getElementById('arrRight');
+  if(currentSlide>=n&&n>0) currentSlide=0;
+
+  off.forEach(function(o,pi){
+    var card=document.createElement('div');
+    card.className='slide-card '+pos[pi];
+    if(n===0){
+      if(pi===2)card.innerHTML='<span class="ph">\uC900\uBE44 \uC911</span>';
+    } else if(n<5&&Math.abs(o)>=n){
+      card.style.opacity='0.2';
+    } else {
+      var idx=((currentSlide+o)%n+n)%n;
+      var iss=issues[idx];
+      if(iss.img){
+        var im=document.createElement('img');im.src=iss.img;im.alt=iss.title;card.appendChild(im);
+      } else {
+        card.innerHTML='<span class="ph">[ view ]</span>';
+      }
+      if(o===0)(function(c){c.onclick=openCurrentModal;})(card);
+    }
+    wrapper.insertBefore(card,anchor);
+  });
+  wrapper.querySelectorAll('.arr-btn').forEach(function(b){
+    b.style.opacity=n<=1?'0.15':'';
+    b.style.pointerEvents=n<=1?'none':'';
+  });
+  updateBadge();
+}
+function updateBadge(){
+  var b=document.getElementById('issueBadge');
+  b.textContent=(issues.length&&issues[currentSlide])?issues[currentSlide].issue:'\uC900\uBE44 \uC911';
+}
+function prevSlide(){if(issues.length<=1)return;currentSlide=(currentSlide-1+issues.length)%issues.length;renderSlider();}
+function nextSlide(){if(issues.length<=1)return;currentSlide=(currentSlide+1)%issues.length;renderSlider();}
+
+/* ===================================================
+   MODAL
+=================================================== */
+function openCurrentModal(){
+  if(!issues.length)return;
+  var iss=issues[currentSlide];
+  document.getElementById('modal-issue').textContent=iss.issue;
+  document.getElementById('modal-title').textContent=iss.title;
+  document.getElementById('modal-essay').textContent=iss.essay||'(\uC18C\uAC1C\uAE00\uC774 \uC5C6\uC2B5\uB2C8\uB2E4)';
+  var dl=document.getElementById('modal-dl');
+  var pdfSrc=iss.pdf||(_notePdfBlob?URL.createObjectURL(_notePdfBlob):DEFAULT_PDF);
+  var pdfName=iss.pdfName||_notePdfFileName;
+  if(pdfSrc.startsWith('blob:')||pdfSrc.startsWith('data:')){dl.href=pdfSrc;dl.download=pdfName;dl.removeAttribute('target');}
+  else{dl.href=pdfSrc;dl.target='_blank';dl.removeAttribute('download');}
+  dl.style.display='inline-block';
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('active');}
+
+/* ===================================================
+   ADMIN NAV
+=================================================== */
+function showLoginPage(){
+  if(isAdmin){showAdminPage();return;}
+  loadGistCfg();
+  document.getElementById('main').style.display='none';
+  document.getElementById('admin-page').classList.remove('active');
+  document.getElementById('login-page').classList.add('active');
+}
+function doLogin(){
+  var id=document.getElementById('login-id').value;
+  var pw=document.getElementById('login-pw').value;
+  if(id===ADMIN_ID&&pw===ADMIN_PW){
+    isAdmin=true;
+    document.getElementById('login-page').classList.remove('active');
+    showAdminPage();
+  } else {
+    document.getElementById('login-error').textContent='\uC544\uC774\uB514 \uB610\uB294 \uBE44\uBC00\uBC88\uD638\uAC00 \uC62C\uBC14\uB974\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4';
+  }
+}
+function showAdminPage(){
+  document.getElementById('main').style.display='none';
+  document.getElementById('login-page').classList.remove('active');
+  document.getElementById('admin-page').classList.add('active');
+  loadGistCfg(); updateSyncUI();
+  loadTextEditors();
+  renderIssueTable(); renderSubTable();
+  // Try to pull fresh data from Gist
+  if(_gistId){
+    setSyncStatus('\uBD88\uB7EC\uC624\uB294 \uC911\u2026','');
+    gistPull(function(ok){
+      if(ok){renderIssueTable();renderSubTable();loadTextEditors();setSyncStatus('\uB3D9\uAE30\uD654 \uC644\uB8CC \u2713','ok');}
+      else{setSyncStatus('Gist \uC5F0\uACB0 \uC2E4\uD328','err');}
+    });
+  }
+}
+function showMain(){
+  document.getElementById('admin-page').classList.remove('active');
+  document.getElementById('login-page').classList.remove('active');
+  document.getElementById('main').style.display='';
+  _editingId=null;
+  renderSlider();
+}
+function switchTab(id,btn){
+  document.querySelectorAll('.admin-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.admin-tab').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+  if(id==='tab-subs')renderSubTable();
+}
+
+/* ===================================================
+   ISSUE CRUD
+=================================================== */
+function readFileAsDataURL(file,cb){
+  var r=new FileReader();r.onload=function(e){cb(e.target.result);};r.readAsDataURL(file);
+}
+
+function addIssue(){
+  var issueVal=document.getElementById('a-issue').value.trim();
+  var titleVal=document.getElementById('a-title').value.trim();
+  if(!issueVal||!titleVal){showToast('\uD638\uC218\uC640 \uC81C\uBAA9\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694');return;}
+  var imgFile=document.getElementById('a-img-file').files[0];
+  var pdfFile=document.getElementById('a-pdf-file').files[0];
+  var essay=document.getElementById('a-essay').value.trim();
+  var btn=document.getElementById('addIssueBtn');
+  var status=document.getElementById('addIssueStatus');
+  btn.disabled=true; status.textContent='\uCC98\uB9AC \uC911\u2026';
+
+  var newIssue={
+    id:Date.now(),issue:issueVal,title:titleVal,
+    img:'',imgName:'',pdf:'',pdfName:'',
+    essay:essay,date:new Date().toISOString().slice(0,10)
+  };
+
+  function finish(){
+    issues.unshift(newIssue);
+    saveAndPush();
+    renderIssueTable(); renderSlider();
+    document.getElementById('a-issue').value='';
+    document.getElementById('a-title').value='';
+    document.getElementById('a-img-file').value='';
+    document.getElementById('a-pdf-file').value='';
+    document.getElementById('a-essay').value='';
+    btn.disabled=false; status.textContent='\uCD94\uAC00\uB418\uC5C8\uC2B5\uB2C8\uB2E4 \u2713';
+    setTimeout(function(){status.textContent='';},3000);
+    document.getElementById('issueCount').textContent=issues.length;
+  }
+
+  function loadPdf(cb){
+    if(pdfFile){
+      // Store as Blob URL in memory (too large for localStorage/Gist)
+      if(newIssue._pdfBlob) URL.revokeObjectURL(newIssue._pdfBlob);
+      newIssue.pdf=URL.createObjectURL(pdfFile);
+      newIssue.pdfName=pdfFile.name;
+      cb();
+    } else { cb(); }
+  }
+
+  if(imgFile){
+    readFileAsDataURL(imgFile,function(data){
+      newIssue.img=data; newIssue.imgName=imgFile.name;
+      loadPdf(finish);
+    });
+  } else {
+    loadPdf(finish);
+  }
+}
+
+function moveIssue(id, dir){
+  var idx=issues.findIndex(function(i){return i.id===id;});
+  if(idx<0)return;
+  var swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=issues.length)return;
+  var tmp=issues[idx];issues[idx]=issues[swapIdx];issues[swapIdx]=tmp;
+  saveAndPush(); renderIssueTable(); renderSlider();
+}
+function deleteIssue(id){
+  if(!confirm('\uC774 \uBC1C\uD589\uBB3C\uC744 \uC0AD\uC81C\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?'))return;
+  issues=issues.filter(function(i){return i.id!==id;});
+  if(currentSlide>=issues.length&&issues.length>0) currentSlide=issues.length-1;
+  if(_editingId===id) _editingId=null;
+  saveAndPush(); renderIssueTable(); renderSlider();
+  document.getElementById('issueCount').textContent=issues.length;
+}
+
+/* ===================================================
+   INLINE EDIT ROW
+=================================================== */
+function openInlineEdit(id){
+  if(_editingId===id){closeInlineEdit();return;}
+  _editingId=id;
+  renderIssueTable();
+  setTimeout(function(){
+    var row=document.getElementById('edit-row-'+id);
+    if(row) row.scrollIntoView({behavior:'smooth',block:'nearest'});
+  },50);
+}
+function closeInlineEdit(){_editingId=null;renderIssueTable();}
+
+function saveInlineEdit(id){
+  var iss=issues.find(function(i){return i.id===id;});
+  if(!iss)return;
+  var _sEl=document.getElementById('ei-status-'+id);
+  if(_sEl){_sEl.textContent='처리 중…';_sEl.style.color='var(--muted)';}
+  iss.issue=document.getElementById('ei-issue-'+id).value.trim()||iss.issue;
+  iss.title=document.getElementById('ei-title-'+id).value.trim()||iss.title;
+  iss.essay=document.getElementById('ei-essay-'+id).value;
+
+  var imgFile=document.getElementById('ei-img-'+id).files[0];
+  var pdfFile=document.getElementById('ei-pdf-'+id).files[0];
+
+  function finish(){
+    saveAndPush(); renderIssueTable(); renderSlider();
+    _editingId=null;
+    showToast('\uC800\uC7A5\uB418\uC5C8\uC2B5\uB2C8\uB2E4 \u2713');
+  }
+
+  function loadPdf(cb){
+    if(pdfFile){
+      if(iss.pdf&&iss.pdf.startsWith('blob:')) URL.revokeObjectURL(iss.pdf);
+      iss.pdf=URL.createObjectURL(pdfFile);
+      iss.pdfName=pdfFile.name;
+      cb();
+    } else { cb(); }
+  }
+
+  if(imgFile){
+    readFileAsDataURL(imgFile,function(data){
+      iss.img=data; iss.imgName=imgFile.name;
+      loadPdf(finish);
+    });
+  } else {
+    loadPdf(finish);
+  }
+}
+
+/* ===================================================
+   RENDER ISSUE TABLE
+=================================================== */
+function renderIssueTable(){
+  var tbody=document.getElementById('issueTableBody');
+  if(!tbody)return;
+  document.getElementById('issueCount').textContent=issues.length;
+
+  if(!issues.length){
+    tbody.innerHTML='<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:1.5rem">\uBC1C\uD589\uBB3C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4</td></tr>';
+    return;
+  }
+
+  var html='';
+  issues.forEach(function(i,idx){
+    var imgTag=i.img?'<span class="file-tag">\u2713 '+(i.imgName||'\uC774\uBBF8\uC9C0')+'</span>':'<span class="file-none">\uC5C6\uC74C</span>';
+    var pdfTag=i.pdf?'<span class="file-tag">\u2713 '+(i.pdfName||'PDF')+'</span>':'<span class="file-none">\uAE30\uBCF8</span>';
+    var isEditing=(_editingId===i.id);
+    var upBtn=idx>0?'<button class="abtn abtn-sm" onclick="event.stopPropagation();moveIssue('+i.id+',-1)" style="padding:0.1rem 0.45rem;min-width:0">\u25B2</button> ':'';
+    var dnBtn=idx<issues.length-1?'<button class="abtn abtn-sm" onclick="event.stopPropagation();moveIssue('+i.id+',1)" style="padding:0.1rem 0.45rem;min-width:0">\u25BC</button>':'';
+
+    html+='<tr style="cursor:pointer'+(isEditing?';background:var(--accent-pale)':'')+'" onclick="openInlineEdit('+i.id+')">'
+      +'<td style="white-space:nowrap;font-size:0.7rem">'+upBtn+dnBtn+'</td>'
+      +'<td>'+esc(i.issue)+'</td>'
+      +'<td>'+esc(i.title)+'</td>'
+      +'<td>'+imgTag+'</td>'
+      +'<td>'+pdfTag+'</td>'
+      +'<td>'+i.date+'</td>'
+      +'<td onclick="event.stopPropagation()" style="white-space:nowrap">'
+        +'<button class="abtn abtn-sm" onclick="openInlineEdit('+i.id+')" style="'+(isEditing?'background:var(--accent-light)':'')+'">'+(isEditing?'\u25BC \uB2EB\uAE30':'\uC218\uC815')+'</button> '
+        +'<button class="abtn abtn-sm abtn-danger" onclick="deleteIssue('+i.id+')">\uC0AD\uC81C</button>'
+      +'</td>'
+      +'</tr>';
+
+    if(_editingId===i.id){
+      var curImg=i.img?'<span class=\'file-tag\'>\u2713 '+esc(i.imgName||'\uC774\uBBF8\uC9C0')+'</span>':'<span class=\'file-none\'>\uC5C6\uC74C</span>';
+      var curPdf=i.pdf?'<span class=\'file-tag\'>\u2713 '+esc(i.pdfName||'PDF')+'</span>':'<span class=\'file-none\'>\uAE30\uBCF8 \uC0AC\uC6A9 \uC911</span>';
+      html+='<tr class="edit-row" id="edit-row-'+i.id+'">'
+        +'<td colspan="7"><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem 1.2rem">'
+          +'<div><label style="font-size:0.66rem;color:var(--muted);display:block;margin-bottom:0.3rem">\uD638\uC218 <span style=\'color:var(--err)\'>\u2731</span></label><input id="ei-issue-'+i.id+'" value="'+esc(i.issue)+'"></div>'
+          +'<div><label style="font-size:0.66rem;color:var(--muted);display:block;margin-bottom:0.3rem">\uC81C\uBAA9 <span style=\'color:var(--err)\'>\u2731</span></label><input id="ei-title-'+i.id+'" value="'+esc(i.title)+'"></div>'
+          +'<div><label style="font-size:0.66rem;color:var(--muted);display:block;margin-bottom:0.3rem">\uD45C\uC9C0 \uC774\uBBF8\uC9C0 '+curImg+'</label><input type="file" id="ei-img-'+i.id+'" accept="image/png,image/jpeg,image/webp" style="font-size:0.74rem"></div>'
+          +'<div><label style="font-size:0.66rem;color:var(--muted);display:block;margin-bottom:0.3rem">PDF '+curPdf+'</label><input type="file" id="ei-pdf-'+i.id+'" accept=".pdf" style="font-size:0.74rem"></div>'
+          +'<div style="grid-column:span 2"><label style="font-size:0.66rem;color:var(--muted);display:block;margin-bottom:0.3rem">\uC18C\uAC1C\uAE00</label><textarea id="ei-essay-'+i.id+'" rows="5">'+esc(i.essay||'')+'</textarea></div>'
+          +'<div style="grid-column:span 2;display:flex;gap:0.6rem;align-items:center">'
+            +'<button class="abtn abtn-sm" onclick="saveInlineEdit('+i.id+')">\u2713 \uC800\uC7A5</button>'
+            +'<button class="abtn abtn-sm abtn-danger" onclick="closeInlineEdit()">\uCDE8\uC18C</button>'
+            +'<span id="ei-status-'+i.id+'" style="font-size:0.68rem;color:var(--muted)"></span>'
+          +'</div>'
+        +'</div></td>'
+        +'</tr>';
+    }
+  });
+  tbody.innerHTML=html;
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ===================================================
+   TEXTS
+=================================================== */
+function loadTextEditors(){
+  var t=texts;
+  document.getElementById('edit-intro-lines').value=t.introLines;
+  document.getElementById('edit-doodle-note').value=t.doodleNote;
+  document.getElementById('edit-mission').value=t.mission;
+  document.getElementById('edit-ex-label').value=t.exLabel;
+  document.getElementById('edit-ex-title').value=t.exTitle;
+  document.getElementById('edit-ex-sub').value=t.exSub;
+  document.getElementById('edit-ex-body').value=t.exBody;
+  document.getElementById('edit-contrib-mail').value=t.contribMail;
+  document.getElementById('edit-sub-title').value=t.subTitle;
+  document.getElementById('edit-sub-sub').value=t.subSub;
+  document.getElementById('edit-footer-bottom').value=t.footerBottom;
+}
+function saveTexts(){
+  texts={
+    introLines:document.getElementById('edit-intro-lines').value,
+    doodleNote:document.getElementById('edit-doodle-note').value,
+    mission:document.getElementById('edit-mission').value,
+    exLabel:document.getElementById('edit-ex-label').value,
+    exTitle:document.getElementById('edit-ex-title').value,
+    exSub:document.getElementById('edit-ex-sub').value,
+    exBody:document.getElementById('edit-ex-body').value,
+    contribMail:document.getElementById('edit-contrib-mail').value,
+    subTitle:document.getElementById('edit-sub-title').value,
+    subSub:document.getElementById('edit-sub-sub').value,
+    footerBottom:document.getElementById('edit-footer-bottom').value
+  };
+  saveAndPush(); applyTexts();
+  var s=document.getElementById('textSaveStatus');
+  s.textContent='\uC800\uC7A5\uB418\uC5C8\uC2B5\uB2C8\uB2E4 \u2713';
+  s.style.color='var(--ok)';
+  setTimeout(function(){s.textContent='';},3000);
+}
+function resetTexts(){
+  if(!confirm('\uAE30\uBCF8\uAC12\uC73C\uB85C \uCD08\uAE30\uD654\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?'))return;
+  texts=Object.assign({},DEFAULT_TEXTS);
+  saveAndPush(); loadTextEditors(); applyTexts();
+  showToast('\uCD08\uAE30\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4');
+}
+
+/* ===================================================
+   NOTE PDF (memory only)
+=================================================== */
+function uploadNotePdf(){
+  var f=document.getElementById('note-pdf-file').files[0];
+  if(!f){showToast('\uD30C\uC77C\uC744 \uC120\uD0DD\uD574\uC8FC\uC138\uC694');return;}
+  _notePdfBlob=f;
+  _notePdfFileName=f.name;
+  localStorage.setItem('doodle_note_pdf_name',f.name);
+  document.getElementById('note-pdf-name').textContent=f.name;
+  document.getElementById('note-pdf-file').value='';
+  var s=document.getElementById('pdfUploadStatus');
+  s.textContent='\uC5C5\uB85C\uB4DC \uC644\uB8CC \u2713 (\uC138\uC158 \uC911 \uC720\uD6A8)';
+  s.style.color='var(--ok)';
+}
+
+/* ===================================================
+   DOWNLOAD NOTE
+=================================================== */
+function downloadNote(){
+  var iss=issues[currentSlide];
+  var src, name;
+  if(iss&&iss.pdf){
+    src=iss.pdf; name=iss.pdfName||'note.pdf';
+  } else if(_notePdfBlob){
+    src=URL.createObjectURL(_notePdfBlob); name=_notePdfFileName;
+  } else {
+    src=DEFAULT_PDF; name='note.pdf';
+  }
+  if(src.startsWith('blob:')||src.startsWith('data:')){
+    var a=document.createElement('a');a.href=src;a.download=name;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+  } else { window.open(src,'_blank'); }
+}
+
+/* ===================================================
+   SUBSCRIBE
+=================================================== */
+function doSubscribe(){
+  var email=document.getElementById('subEmail').value.trim();
+  if(!email||!email.includes('@')){showToast('\uC62C\uBC14\uB978 \uC774\uBA54\uC77C\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694');return;}
+  if(subscribers.find(function(s){return s.email===email;})){showToast('\uC774\uBBF8 \uAD6C\uB3C5 \uC2E0\uCCAD\uB41C \uC774\uBA54\uC77C\uC785\uB2C8\uB2E4');return;}
+  subscribers.push({email:email,date:new Date().toISOString().slice(0,10)});
+  saveAndPush();
+  document.getElementById('subEmail').value='';
+  showToast('\uAD6C\uB3C5 \uC2E0\uCCAD\uC774 \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4 \u2713');
+}
+
+function renderSubTable(){
+  var tbody=document.getElementById('subTableBody');
+  if(!tbody)return;
+  document.getElementById('subCount').textContent=subscribers.length;
+  tbody.innerHTML=subscribers.map(function(s){
+    return '<tr><td>'+esc(s.email)+'</td><td>'+s.date+'</td>'
+      +'<td><button class="abtn abtn-sm abtn-danger" onclick="deleteSub(\''+esc(s.email)+'\')">\uC0AD\uC81C</button></td></tr>';
+  }).join('')||'<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:1rem">\uAD6C\uB3C5\uC790\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4</td></tr>';
+}
+function deleteSub(email){
+  subscribers=subscribers.filter(function(s){return s.email!==email;});
+  saveAndPush(); renderSubTable();
+  showToast('\uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4');
+}
+function clearAllSubs(){
+  if(!confirm('\uAD6C\uB3C5\uC790 \uC804\uCCB4\uB97C \uC0AD\uC81C\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?'))return;
+  subscribers=[];saveAndPush();renderSubTable();showToast('\uC804\uCCB4 \uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4');
+}
+function exportSubs(){
+  if(!subscribers.length){showToast('\uAD6C\uB3C5\uC790\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4');return;}
+  var csv='\uFEFF\uC774\uBA54\uC77C,\uC2E0\uCCAD\uC77C\n'+subscribers.map(function(s){return s.email+','+s.date;}).join('\n');
+  var a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='subscribers.csv';a.click();
+}
+
+/* ===================================================
+   TOAST
+=================================================== */
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2600);
+}
+
+/* ===================================================
+   BOOT
+=================================================== */
+loadGistCfg();
+loadLocal();
+applyTexts();
+document.getElementById('note-pdf-name').textContent=
+  localStorage.getItem('doodle_note_pdf_name')||'note.pdf (기본)';
+
+['login-id','login-pw'].forEach(function(id){
+  document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+});
+
+// Pull from Gist on page load (read-only, no token needed for public gist)
+if(_gistId){
+  gistPull(function(ok){
+    if(ok){applyTexts();renderSlider();}
+  });
+}
+
+if(window.location.hash==='#admin'||window.location.search==='?admin'){
+  document.getElementById('intro').style.display='none';
+  document.getElementById('main').classList.add('visible');
+  renderSlider();showLoginPage();
+} else {
+  renderSlider();
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowLeft')prevSlide();
+  if(e.key==='ArrowRight')nextSlide();
+  if(e.key==='Escape')closeModal();
+});
+</script>
+</body>
+</html>
